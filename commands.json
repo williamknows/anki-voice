@@ -1,0 +1,50 @@
+{
+    "attach": {
+        "related_words": [
+            "attack",
+            "a touch",
+            "the touch",
+            "a torch"
+        ]
+    },
+    "show": {
+        "related_words": [
+            "sure"
+        ]
+    },
+    "again": {
+        "related_words": [
+            "fail",
+            "failed"
+        ]
+    },
+    "difficult": {
+        "related_words": [
+            "hard"
+        ]
+    },
+    "good": {
+        "related_words": []
+    },
+    "easy": {
+        "related_words": []
+    },
+    "pause": {
+        "related_words": [
+            "detection off",
+            "cause"
+        ]
+    },
+    "unpause": {
+        "related_words": [
+            "detection on",
+            "on pause"
+        ]
+    },
+    "close": {
+        "related_words": []
+    },
+    "quit": {
+        "related_words": []
+    }
+}
