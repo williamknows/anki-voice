@@ -8,11 +8,12 @@ import logging
 import os
 from pathlib import Path
 import pyaudio
+import pyttsx3
+import queue
 import requests
 import sys
 import time
 import threading
-import vlc
 from vosk import Model, KaldiRecognizer, SetLogLevel
 
 logging.basicConfig(level=logging.WARNING,
@@ -20,6 +21,8 @@ logging.basicConfig(level=logging.WARNING,
                     handlers=[
                         logging.FileHandler("anki-voice.log"),
                         logging.StreamHandler()])
+
+audio_feedback_queue = queue.Queue()
 
 
 class AnkiActionHandler():
@@ -131,10 +134,7 @@ class AnkiActionHandler():
         if called_through_attach_command:
             print("Executed: attach")
             if self._alert_sound_enabled:
-                media = vlc.MediaPlayer(
-                    Path(".", "resources", "sounds", "ding.wav"))
-                media.set_rate(1)
-                media.play()
+                audio_feedback_queue.put_nowait("Success: Attached.")
 
     def show(self):
         """Reveals the answer of the current card shown within the Anki user interface."""
@@ -308,6 +308,8 @@ class AnkiSpeechToCommand():
         self._alert_sound_enabled = alert_sound_enabled
         # Parse command JSON configuation
         self.command_config_load(command_config)
+        # tba
+        self.engine = pyttsx3.init()
 
     def command_config_load(self, command_config):
         try:
@@ -371,20 +373,14 @@ class AnkiSpeechToCommand():
         self._speech_to_text_paused = True
         print("Executed: pause")
         if self._alert_sound_enabled:
-            media = vlc.MediaPlayer(
-                Path(".", "resources", "sounds", "ding.wav"))
-            media.set_rate(1)
-            media.play()
+            audio_feedback_queue.put_nowait("Success: Paused.")
 
     def unpause(self):
         """Unpauses speech-to-text monitoring (permitting any commands)."""
         self._speech_to_text_paused = False
         print("Executed: unpause")
         if self._alert_sound_enabled:
-            media = vlc.MediaPlayer(
-                Path(".", "resources", "sounds", "ding.wav"))
-            media.set_rate(1)
-            media.play()
+            audio_feedback_queue.put_nowait("Success: Unpaused.")
 
     def quit(self):
         """Triggers exit of anki-voice."""
@@ -416,7 +412,7 @@ class AnkiSpeechToCommand():
             if detected_words not in self._unpause_commands:
                 return
         # Process commands
-        print("Detected, pre-analysis:", detected_words)
+        print("Detected:", detected_words)
         if detected_words in self._attach_commands:
             self._anki_action.get_current_card_information(
                 called_through_attach_command=True)
@@ -478,6 +474,14 @@ class AnkiVoiceError(Exception):
         super().__init__(message)
 
 
+def CommandAudioFeedback():
+    """Checks queue for information to speak back to user through text-to-speech."""
+    while True:
+        text_to_speak = audio_feedback_queue.get()
+        pyttsx3.speak(text_to_speak)
+        audio_feedback_queue.task_done()
+
+
 def main(args):
     try:
         print("""              _    _                 _          
@@ -489,11 +493,13 @@ def main(args):
         print("Before issuing voice commands verify that:")
         print("(1) Anki is open with the AnkiConnect plugin installed.")
         print("(2) A deck is open in review mode (i.e., question prompts are visible).")
-        print("If either of these conditions are not met, errors may occur.\n")
-        print("|||||||||||||||||||||||||||||||||||||||||||||||| REAL-TIME COMMAND LOG:\n")
+        print("If either of these conditions are not met, errors may occur.")
+        print("\nStarting up...\n")
         control = AnkiSpeechToCommand(
             command_config=args.command_config, alert_sound_enabled=args.alert_sound_disabled)
         control.run()
+        print("STARTED ||||||||||||||||||||||||||||||||||||||||| REAL-TIME COMMAND LOG:\n")
+        CommandAudioFeedback()
     except (KeyboardInterrupt, SystemExit):
         sys.exit(0)
 

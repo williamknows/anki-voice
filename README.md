@@ -7,6 +7,7 @@ Review Anki flash cards using voice commands.  This is a currently a standalone 
 1. Hands-free flash card review.
 2. When combined with external text-to-speech modules it can also be used for on-the-go, screen-free review (e.g., through bluetooth headphones).
 3. Voice command recognition is all offline, so no costly cloud API services.
+4. No operating system-specific dependencies, it's just Python.
 
 ## Getting Started
 
@@ -19,16 +20,12 @@ These instructions will get you a copy of `anki-voice` up and running on your lo
 `anki-voice` requires Python 3 (tested with 3.8), and multiple non-standard modules that can be installed using pip with:
 
 ```
-pip3 install vosk pyaudio python-vlc
+pip3 install vosk pyaudio pyttsx3
 ```
 
-The module `vosk` is used for (offline) speech recognition, while `pyaudio` and `python-vlc` are used for audio capture and playback.
+The module `vosk` is used for (offline) speech-to-text (speech recognition), `pyaudio` for audio capture, and `pyttsx3` for text-to-speech.
 
-### (2) VLC Dependencies
-
-VLC is required for audio playback (through the `python-vlc`) module. This just requires the standard installation package from the VLC website.
-
-### (3) Anki Dependencies
+### (2) Anki Dependencies
 
 `anki-voice` naturally requires Anki (tested with the 2.1.x branch), but also requires the `AnkiConnect` plugin.  This plugin is used to expose an API (localhost only by default) which can be used to interact with Anki, incluing controlling the graphical user interface.
 
@@ -46,7 +43,7 @@ defaults write net.ichi2.anki NSAppSleepDisabled -bool true
 defaults write org.qt-project.Qt.QtWebEngineCore NSAppSleepDisabled -bool true
 ```
 
-### (4) Vosk Dependencies
+### (3) Vosk Dependencies
 
 `vosk` the Python speech reconition requires a "model" to be downloaded, which represents characteristics of sounds and their relation to particular words.  Such models are trained based on a large data sample.  The creators of `vosk` have collated multiple compatible models for US English. At least one of these models must be downloaded from the following URL:
 
