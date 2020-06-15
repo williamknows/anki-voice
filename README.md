@@ -101,7 +101,7 @@ At any point the following commands can be used:
 
 2. **"quit"** is used to close the `anki-voice` application.
 3. **"pause"** is used to stop speech recognition so commands can be triggered (except "unpause").
-4. **"close"** is used to restart speech recognition allowing any commands to be triggered.
+4. **"unpause"** is used to restart speech recognition allowing any commands to be triggered.
 
 ### Adding and Altering Commands
 
